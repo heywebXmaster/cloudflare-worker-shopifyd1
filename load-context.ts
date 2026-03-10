@@ -19,10 +19,27 @@ declare module "@remix-run/cloudflare" {
 }
 
 export function getLoadContext({ context }: GetLoadContextArgs) {
-  // Initialize the DB if available
-  if (context.cloudflare?.env) {
-    setupDb(context.cloudflare.env);
+  const env = context.cloudflare?.env;
+
+  if (env) {
+    // Sync wrangler vars to process.env so shopifyApp() can read them
+    const varsToSync = [
+      "SHOPIFY_API_KEY",
+      "SHOPIFY_API_SECRET",
+      "SHOPIFY_APP_URL",
+      "SCOPES",
+      "SHOP_CUSTOM_DOMAIN",
+    ] as const;
+
+    for (const key of varsToSync) {
+      if ((env as any)[key] && !process.env[key]) {
+        process.env[key] = (env as any)[key];
+      }
+    }
+
+    // Initialize the DB
+    setupDb(env);
   }
-  
+
   return context;
 }

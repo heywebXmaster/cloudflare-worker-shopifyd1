@@ -1,13 +1,29 @@
-import { defineConfig, type UserConfig } from "vite";
+import { defineConfig, type UserConfig, type Plugin } from "vite";
 import {
   vitePlugin as remix,
   cloudflareDevProxyVitePlugin,
 } from "@remix-run/dev";
-import { installGlobals } from "@remix-run/node";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { getLoadContext } from "./load-context";
 
-installGlobals({ nativeFetch: true });
+// Fix Vite 6 JSON import attributes inconsistency between @shopify/shopify-app-remix and @shopify/polaris
+function fixJsonImportAttributes(): Plugin {
+  return {
+    name: "fix-json-import-attributes",
+    hotUpdate({ modules }) {
+      // no-op, just ensures consistent module handling
+    },
+    transform(code, id) {
+      // Strip `with { type: "json" }` from imports to make them consistent
+      if (id.includes("@shopify") && code.includes('with { type: "json" }')) {
+        return {
+          code: code.replace(/\s*with\s*\{\s*type:\s*["']json["']\s*\}/g, ""),
+          map: null,
+        };
+      }
+    },
+  };
+}
 
 declare module "@remix-run/cloudflare" {
   interface Future {
@@ -58,6 +74,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    fixJsonImportAttributes(),
     cloudflareDevProxyVitePlugin({
       getLoadContext,
     }),
@@ -84,6 +101,7 @@ export default defineConfig({
   build: {
     minify: true,
     assetsInlineLimit: 0,
+    emptyOutDir: false,
   },
   optimizeDeps: {
     include: ["@shopify/app-bridge-react", "@shopify/polaris"],

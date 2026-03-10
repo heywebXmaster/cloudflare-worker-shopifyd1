@@ -26,8 +26,8 @@ class D1SessionStorage implements SessionStorage {
     try {
       await db.prepare(`
         INSERT OR REPLACE INTO shopify_sessions
-        (id, shop, state, isOnline, scope, accessToken, expires, onlineAccessInfo)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        (id, shop, state, isOnline, scope, accessToken, expires, onlineAccessInfo, refreshToken, refreshTokenExpires)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
         session.id || null,
         session.shop || null,
@@ -36,7 +36,9 @@ class D1SessionStorage implements SessionStorage {
         session.scope || null,
         session.accessToken || null,
         session.expires ? session.expires.getTime() : null,
-        session.onlineAccessInfo ? JSON.stringify(session.onlineAccessInfo) : null
+        session.onlineAccessInfo ? JSON.stringify(session.onlineAccessInfo) : null,
+        (session as any).refreshToken || null,
+        (session as any).refreshTokenExpires ? new Date((session as any).refreshTokenExpires).getTime() : null
       ).run();
       return true;
     } catch (error) {
@@ -75,6 +77,13 @@ class D1SessionStorage implements SessionStorage {
       
       if (result.onlineAccessInfo) {
         session.onlineAccessInfo = JSON.parse(result.onlineAccessInfo as string);
+      }
+
+      if (result.refreshToken) {
+        (session as any).refreshToken = result.refreshToken as string;
+      }
+      if (result.refreshTokenExpires) {
+        (session as any).refreshTokenExpires = new Date(result.refreshTokenExpires as number);
       }
       
       return session;
@@ -150,6 +159,13 @@ class D1SessionStorage implements SessionStorage {
         if (result.onlineAccessInfo) {
           session.onlineAccessInfo = JSON.parse(result.onlineAccessInfo as string);
         }
+
+        if (result.refreshToken) {
+          (session as any).refreshToken = result.refreshToken as string;
+        }
+        if (result.refreshTokenExpires) {
+          (session as any).refreshTokenExpires = new Date(result.refreshTokenExpires as number);
+        }
         
         return session;
       });
@@ -177,7 +193,7 @@ function getShopifyApp() {
       distribution: AppDistribution.AppStore,
       future: {
         unstable_newEmbeddedAuthStrategy: true,
-        removeRest: true,
+        expiringOfflineAccessTokens: true,
       },
       ...(process.env.SHOP_CUSTOM_DOMAIN
         ? { customShopDomains: [process.env.SHOP_CUSTOM_DOMAIN] }
@@ -190,8 +206,8 @@ function getShopifyApp() {
 export const apiVersion = ApiVersion.January25;
 
 // Lazy-load the shopify app when these functions are called
-export const addDocumentResponseHeaders = (response: Response, request: Request) => {
-  return getShopifyApp().addDocumentResponseHeaders(response, request);
+export const addDocumentResponseHeaders = (...args: Parameters<ReturnType<typeof shopifyApp>["addDocumentResponseHeaders"]>) => {
+  return getShopifyApp().addDocumentResponseHeaders(...args);
 };
 
 export const authenticate = {
@@ -200,7 +216,10 @@ export const authenticate = {
   },
   public: (request: Request) => {
     return getShopifyApp().authenticate.public(request);
-  }
+  },
+  webhook: (request: Request) => {
+    return getShopifyApp().authenticate.webhook(request);
+  },
 };
 
 export const unauthenticated = {
@@ -209,7 +228,7 @@ export const unauthenticated = {
   },
   public: (request: Request) => {
     return getShopifyApp().unauthenticated.public(request);
-  }
+  },
 };
 
 export const login = (request: Request) => {
@@ -220,11 +239,13 @@ export const registerWebhooks = (request: Request) => {
   return getShopifyApp().registerWebhooks(request);
 };
 
+export const sessionStorageInstance = sessionStorage;
+
 // Function to initialize the database for the session storage
 export async function initializeDb(db: D1Database) {
   try {
-    // Create the sessions table if it doesn't exist - all on one line
-    await db.exec(`CREATE TABLE IF NOT EXISTS shopify_sessions (id TEXT PRIMARY KEY, shop TEXT NOT NULL, state TEXT, isOnline INTEGER, scope TEXT, accessToken TEXT, expires INTEGER, onlineAccessInfo TEXT)`);
+    // Create the sessions table if it doesn't exist - includes refreshToken fields for v4
+    await db.exec(`CREATE TABLE IF NOT EXISTS shopify_sessions (id TEXT PRIMARY KEY, shop TEXT NOT NULL, state TEXT, isOnline INTEGER, scope TEXT, accessToken TEXT, expires INTEGER, onlineAccessInfo TEXT, refreshToken TEXT, refreshTokenExpires INTEGER)`);
 
     // Set the global DB instance
     globalThis.shopifyDb = db;
@@ -239,8 +260,13 @@ export async function initializeDb(db: D1Database) {
 
 // Add a function that can be called from load-context.ts
 export function setupDb(env: any) {
+  // Sync env vars to process.env for shopifyApp() initialization
+  if (env?.SHOPIFY_APP_URL && !process.env.SHOPIFY_APP_URL) {
+    // First time seeing env vars — clear any cached instance created with empty config
+    globalThis.shopifyAppInstance = undefined;
+  }
+
   if (env?.DB && !globalThis.shopifyDb) {
-    // Initialize the database if it exists and hasn't been initialized
     initializeDb(env.DB).catch(console.error);
   }
 }
@@ -251,5 +277,5 @@ export default {
   unauthenticated,
   login,
   registerWebhooks,
-  addDocumentResponseHeaders
+  addDocumentResponseHeaders,
 };

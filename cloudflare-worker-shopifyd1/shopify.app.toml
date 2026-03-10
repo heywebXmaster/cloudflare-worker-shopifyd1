@@ -6,10 +6,6 @@ embedded = true
 name = "your-app-name"
 handle = "your-app-handle"
 
-# Your development store URL — get it from Shopify Partner Dashboard
-# Partner Dashboard > Stores > pick your dev store > copy the .myshopify.com domain
-dev_store_url = "your-store.myshopify.com"
-
 [build]
 include_config_on_deploy = true
 
