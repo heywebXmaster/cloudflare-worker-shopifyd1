@@ -1,14 +1,13 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+# This file uses placeholders that will be replaced by ai-gen during deployment
 
-client_id = ""
-application_url = ""
+client_id = "{{SHOPIFY_API_KEY}}"
+application_url = "{{SHOPIFY_APP_URL}}"
 embedded = true
-name = "your-app-name"
-handle = "your-app-handle"
+name = "{{APP_NAME}}"
+handle = "{{APP_HANDLE}}"
 
-# Your development store URL — get it from Shopify Partner Dashboard
-# Partner Dashboard > Stores > pick your dev store > copy the .myshopify.com domain
-dev_store_url = "your-store.myshopify.com"
+dev_store_url = "{{DEV_STORE_URL}}"
 
 [build]
 include_config_on_deploy = true
@@ -25,10 +24,10 @@ api_version = "2025-04"
   uri = "/webhooks/app/scopes_update"
 
 [access_scopes]
-scopes = "write_products"
+scopes = "{{SCOPES}}"
 
 [auth]
-redirect_urls = [ "https://your-app.workers.dev/auth/callback" ]
+redirect_urls = [ "{{SHOPIFY_APP_URL}}/auth/callback" ]
 
 [pos]
 embedded = false
