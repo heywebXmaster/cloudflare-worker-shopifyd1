@@ -199,6 +199,9 @@ class DatabaseService {
   }
 }
 
+// Export the class for creating new instances
+export { DatabaseService };
+
 // Export a singleton instance of the DatabaseService
 // This ensures we have a single shared instance across the application
 const dbService = new DatabaseService();

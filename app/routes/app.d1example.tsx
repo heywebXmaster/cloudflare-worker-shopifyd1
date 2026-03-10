@@ -3,7 +3,7 @@ import type { LoaderFunctionArgs } from "@remix-run/node";
 import { Page, Layout, Card, Text, BlockStack, Checkbox } from "@shopify/polaris";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
-import dbService from "./db.service";
+import dbService, { DatabaseService } from "../db.service";
 import { json, useLoaderData, useFetcher } from "@remix-run/react";
 
 // Constants for table names
@@ -20,9 +20,9 @@ const DB3_TABLE = "example_table_db3";
  */
 async function loadDatabaseSettings(context: any, bindingName = 'DB', tableName: string) {
   // Create a database service instance
-  const service = bindingName === 'DB' ? 
-    dbService : 
-    new dbService.constructor();
+  const service = bindingName === 'DB' ?
+    dbService :
+    new DatabaseService();
   
   // Default response data
   let data = {
@@ -78,9 +78,9 @@ async function loadDatabaseSettings(context: any, bindingName = 'DB', tableName:
  */
 async function updateDatabaseSetting(context: any, bindingName = 'DB', tableName: string, isChecked: boolean) {
   // Create a database service instance
-  const service = bindingName === 'DB' ? 
-    dbService : 
-    new dbService.constructor();
+  const service = bindingName === 'DB' ?
+    dbService :
+    new DatabaseService();
   
   // Initialize the database
   const dbAvailable = service.initFromContext(context, bindingName);
@@ -217,7 +217,7 @@ export default function Index() {
   /**
    * Generic handler for checkbox state changes
    */
-  const handleCheckboxChange = (dbTarget, checked) => {
+  const handleCheckboxChange = (dbTarget: string, checked: boolean) => {
     // Update local state
     if (dbTarget === "DB3") {
       setCheckboxStateDB3(checked);
@@ -253,14 +253,20 @@ export default function Index() {
   /**
    * Helper function to format timestamps to readable dates
    */
-  const formatDate = (timestamp) => {
+  const formatDate = (timestamp: number | string) => {
     return new Date(Number(timestamp)).toLocaleString();
   };
 
   /**
    * Render a database settings section for each DB
    */
-  const renderDatabaseSection = (dbName, isChecked, onChange, isAvailable, error) => (
+  const renderDatabaseSection = (
+    dbName: string,
+    isChecked: boolean,
+    onChange: (checked: boolean) => void,
+    isAvailable: boolean,
+    error: string
+  ) => (
     <BlockStack gap="200">
       <Checkbox
         label={isChecked ? `${dbName}: This box is checked` : `${dbName}: This box is not checked`}
@@ -269,12 +275,12 @@ export default function Index() {
         onChange={onChange}
       />
       {error && (
-        <Text as="p" variant="bodyMd" color="critical">
+        <Text as="p" variant="bodyMd" tone="critical">
           Error: {error}
         </Text>
       )}
       {!isAvailable && (
-        <Text as="p" variant="bodyMd" color="subdued">
+        <Text as="p" variant="bodyMd" tone="subdued">
           Note: Database {dbName} is not available. Settings will not persist between sessions.
         </Text>
       )}
@@ -311,7 +317,7 @@ export default function Index() {
           </table>
         </div>
       ) : (
-        <Text as="p" variant="bodyMd" color="subdued">
+        <Text as="p" variant="bodyMd" tone="subdued">
           No data available in the database table, click the checkbox above to write test data. If you have not created DB2 and DB3 manually, check the wrangler_multidbexample.jsonc file for details on how to do so.
         </Text>
       )}

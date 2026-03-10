@@ -42,7 +42,7 @@ export default function App() {
           <div className="w-full max-w-2xl">
             <BlockStack gap="400">
              {/* Welcome Card */}
-             <Card>
+             {/* <Card>
                 <BlockStack gap="400">
                   <Text as="h1" variant="headingXl">
                     Welcome to Shopify App Template - Cloudflare Workers
@@ -66,7 +66,7 @@ export default function App() {
                     </Link>.
                   </Text>
                 </BlockStack>
-              </Card>
+              </Card> */}
 
               {/* Login Form Card */}
               {showForm && (
@@ -88,7 +88,7 @@ export default function App() {
                           }
                           autoComplete="off"
                         />
-                        <Button submit primary>
+                        <Button submit variant="primary">
                           Log in
                         </Button>
                       </FormLayout>
