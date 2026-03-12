@@ -1,0 +1,41 @@
+name: Deploy to Cloudflare Workers
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Replace template variables in wrangler.jsonc
+        run: |
+          sed -i 's/{{WORKER_NAME}}/${{ vars.WORKER_NAME || secrets.WORKER_NAME }}/g' wrangler.jsonc
+          sed -i 's/{{DATABASE_NAME}}/${{ vars.DATABASE_NAME || secrets.DATABASE_NAME }}/g' wrangler.jsonc
+          sed -i 's/{{DATABASE_ID}}/${{ vars.DATABASE_ID || secrets.DATABASE_ID }}/g' wrangler.jsonc
+          sed -i 's/{{SHOPIFY_API_KEY}}/${{ secrets.SHOPIFY_API_KEY }}/g' wrangler.jsonc
+          sed -i 's/{{SHOPIFY_API_SECRET}}/${{ secrets.SHOPIFY_API_SECRET }}/g' wrangler.jsonc
+          sed -i 's/{{SHOPIFY_APP_URL}}/${{ secrets.SHOPIFY_APP_URL }}/g' wrangler.jsonc
+          sed -i 's/{{SCOPES}}/${{ vars.SHOPIFY_SCOPES || secrets.SHOPIFY_SCOPES }}/g' wrangler.jsonc
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Cloudflare Workers
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
