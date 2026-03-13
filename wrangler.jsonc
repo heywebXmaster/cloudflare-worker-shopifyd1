@@ -1,5 +1,5 @@
 {
-  "name": "{{WORKER_NAME}}",
+  "name": "my-shopify-app",
   "compatibility_date": "2025-04-01",
   "compatibility_flags": ["nodejs_compat"],
   "main": "./server.ts",
@@ -13,14 +13,14 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "{{DATABASE_NAME}}",
-      "database_id": "{{DATABASE_ID}}"
+      "database_name": "db_test",
+      "database_id": "6a65a378-1e77-4a04-9212-e23881c3b8fe"
     }
   ],
   "vars": {
-    "SHOPIFY_API_KEY": "{{SHOPIFY_API_KEY}}",
-    "SHOPIFY_API_SECRET": "{{SHOPIFY_API_SECRET}}",
-    "SHOPIFY_APP_URL": "{{SHOPIFY_APP_URL}}",
-    "SCOPES": "{{SCOPES}}"
+    "SHOPIFY_API_KEY": "eaf544c73ccfc7dda41fb1e770a0e25f",
+    "SHOPIFY_API_SECRET": "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",
+    "SHOPIFY_APP_URL": "https://my-shopify-app.tangjing.workers.dev",
+    "SCOPES": "read_products,write_products"
   }
 }

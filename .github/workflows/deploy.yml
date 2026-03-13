@@ -21,16 +21,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Replace template variables in wrangler.jsonc
-        run: |
-          sed -i 's/{{WORKER_NAME}}/${{ vars.WORKER_NAME || secrets.WORKER_NAME }}/g' wrangler.jsonc
-          sed -i 's/{{DATABASE_NAME}}/${{ vars.DATABASE_NAME || secrets.DATABASE_NAME }}/g' wrangler.jsonc
-          sed -i 's/{{DATABASE_ID}}/${{ vars.DATABASE_ID || secrets.DATABASE_ID }}/g' wrangler.jsonc
-          sed -i 's/{{SHOPIFY_API_KEY}}/${{ secrets.SHOPIFY_API_KEY }}/g' wrangler.jsonc
-          sed -i 's/{{SHOPIFY_API_SECRET}}/${{ secrets.SHOPIFY_API_SECRET }}/g' wrangler.jsonc
-          sed -i 's/{{SHOPIFY_APP_URL}}/${{ secrets.SHOPIFY_APP_URL }}/g' wrangler.jsonc
-          sed -i 's/{{SCOPES}}/${{ vars.SHOPIFY_SCOPES || secrets.SHOPIFY_SCOPES }}/g' wrangler.jsonc
-
       - name: Build
         run: npm run build
 

@@ -1,13 +1,13 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 # This file uses placeholders that will be replaced by ai-gen during deployment
 
-client_id = "{{SHOPIFY_API_KEY}}"
-application_url = "{{SHOPIFY_APP_URL}}"
+client_id = "eaf544c73ccfc7dda41fb1e770a0e25f"
+application_url = "https://my-shopify-app.tangjing.workers.dev"
 embedded = true
-name = "{{APP_NAME}}"
-handle = "{{APP_HANDLE}}"
+name = "my-shopify-app"
+handle = "my-shopify-app"
 
-dev_store_url = "{{DEV_STORE_URL}}"
+dev_store_url = "https://your-dev-store.myshopify.com"
 
 [build]
 include_config_on_deploy = true
@@ -24,10 +24,10 @@ api_version = "2025-04"
   uri = "/webhooks/app/scopes_update"
 
 [access_scopes]
-scopes = "{{SCOPES}}"
+scopes = "read_products,write_products"
 
 [auth]
-redirect_urls = [ "{{SHOPIFY_APP_URL}}/auth/callback" ]
+redirect_urls = [ "https://my-shopify-app.tangjing.workers.dev/auth/callback" ]
 
 [pos]
 embedded = false
