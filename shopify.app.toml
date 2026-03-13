@@ -27,7 +27,11 @@ api_version = "2025-04"
 scopes = "read_products,write_products"
 
 [auth]
-redirect_urls = [ "https://my-shopify-app.tangjing.workers.dev/auth/callback" ]
+redirect_urls = [
+  "https://my-shopify-app.tangjing.workers.dev/auth/callback",
+  "https://my-shopify-app.tangjing.workers.dev/auth/shopify/callback",
+  "https://my-shopify-app.tangjing.workers.dev/api/auth/callback"
+]
 
 [pos]
 embedded = false
