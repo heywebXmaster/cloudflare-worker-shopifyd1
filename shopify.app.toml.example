@@ -27,7 +27,11 @@ api_version = "2025-04"
 scopes = "{{SCOPES}}"
 
 [auth]
-redirect_urls = [ "{{SHOPIFY_APP_URL}}/auth/callback" ]
+redirect_urls = [
+  "{{SHOPIFY_APP_URL}}/auth/callback",
+  "{{SHOPIFY_APP_URL}}/auth/shopify/callback",
+  "{{SHOPIFY_APP_URL}}/api/auth/callback"
+]
 
 [pos]
 embedded = false
