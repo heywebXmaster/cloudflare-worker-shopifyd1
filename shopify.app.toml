@@ -4,13 +4,12 @@
 client_id = "eaf544c73ccfc7dda41fb1e770a0e25f"
 application_url = "https://my-shopify-app.tangjing.workers.dev"
 embedded = true
-name = "my-shopify-app"
-handle = "my-shopify-app"
+name = "my-cf-app"
+handle = "my-cf-app-123"
 
-dev_store_url = "https://your-dev-store.myshopify.com"
+#dev_store_url = "https://dev-storeui.myshopify.com"
 
 [build]
-include_config_on_deploy = true
 
 [webhooks]
 api_version = "2025-04"
