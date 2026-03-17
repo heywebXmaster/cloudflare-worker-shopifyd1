@@ -7,8 +7,6 @@ embedded = true
 name = "{{APP_NAME}}"
 handle = "{{APP_HANDLE}}"
 
-dev_store_url = "{{DEV_STORE_URL}}"
-
 [build]
 include_config_on_deploy = true
 
