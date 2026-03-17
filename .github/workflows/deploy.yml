@@ -21,36 +21,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Initial Build
+      - name: Build
         run: npm run build
 
-      - name: Initial Deploy to get Worker URL
-        id: initial_deploy
-        run: |
-          OUTPUT=$(npx wrangler deploy 2>&1)
-          echo "$OUTPUT"
-          WORKER_URL=$(echo "$OUTPUT" | grep -oP 'https://[^\s]+\.workers\.dev' | head -1)
-          echo "worker_url=$WORKER_URL" >> $GITHUB_OUTPUT
-          echo "Worker URL: $WORKER_URL"
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-      - name: Update URLs in config files
-        run: |
-          WORKER_URL="${{ steps.initial_deploy.outputs.worker_url }}"
-          echo "Updating URLs to: $WORKER_URL"
-          sed -i "s|https://[^'\"]*\.workers\.dev|$WORKER_URL|g" wrangler.jsonc
-          sed -i "s|https://[^'\"]*\.workers\.dev|$WORKER_URL|g" shopify.app.toml
-          echo "Updated wrangler.jsonc:"
-          cat wrangler.jsonc
-          echo "Updated shopify.app.toml:"
-          cat shopify.app.toml
-
-      - name: Rebuild with correct URLs
-        run: npm run build
-
-      - name: Final Deploy
+      - name: Deploy
         run: npx wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
